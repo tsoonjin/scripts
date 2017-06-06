@@ -36,7 +36,6 @@ def analyze_url(url):
     iframe_url = soup.find('iframe')['src']
     openload = analyze_openload(iframe_url, driver)
     driver.quit()
-    print(openload)
     return openload
 
 
