@@ -12,7 +12,7 @@ from urllib.request import Request, urlopen
 from urllib.parse import quote, urlsplit, urlunsplit
 
 AVGLE_CATEGORIES_API_URL = 'https://api.avgle.com/v1/categories'
-AVGLE_LIST_VIDEOS_API_URL = 'https://api.avgle.com/v1/videos/{}?c={}&limit={}'
+AVGLE_LIST_VIDEOS_API_URL = 'https://api.avgle.com/v1/videos/{}?c={}&limit={}&o={}'
 AVGLE_SEARCH_VIDEOS_API_URL = 'https://api.avgle.com/v1/tw/{}/{}?limit={}'
 
 def extractJSON(script):
@@ -23,14 +23,15 @@ def extractJSON(script):
     return res
 
 
-def get_videos(chid, output='links.txt', limit=250):
+def get_videos(chid, output='links.txt', limit=250, order='mv'):
     """ Extract videos with given parameters
         @param chid: filter only videos from given category
         @param limit: maximum number of videos per page
+        @param order: mv: most view, tf: most favoured, tf: top rated
     """
     videos = []
     i = 1
-    url = AVGLE_LIST_VIDEOS_API_URL.format(0, chid, limit)
+    url = AVGLE_LIST_VIDEOS_API_URL.format(0, chid, limit, order)
     response = json.loads(urlopen(url).read().decode())
 
     while response['success']:
@@ -38,7 +39,7 @@ def get_videos(chid, output='links.txt', limit=250):
         vids = [v['video_url'] for v in vids]
         videos.extend(vids)
         if response['response']['has_more']:
-            url = AVGLE_LIST_VIDEOS_API_URL.format(i, chid, limit)
+            url = AVGLE_LIST_VIDEOS_API_URL.format(i, chid, limit, order)
             response = json.loads(urlopen(url).read().decode())
             i += 1
         else:
@@ -94,7 +95,6 @@ if __name__ == '__main__':
         get_videos(sys.argv[1], sys.argv[2])
     else:
         filename = sys.argv[1].rsplit('.', 1)[0]
-        print(filename)
         with open(sys.argv[1], encoding='utf-8') as f, open('{}links.txt'.format(filename), 'w') as w:
             results = []
             urls = f.readlines()
